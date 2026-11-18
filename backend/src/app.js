@@ -1,28 +1,17 @@
-import cors from "cors";
-import express from "express";
-import helmet from "helmet";
-
-import { errorHandler } from "./middlewares/errorHandler.js";
-import healthRoutes from "./routes/healthRoutes.js";
+const express = require('express');
+const cors = require('cors');
+const routes = require('./routes');
+const { naoEncontrada, tratarErros } = require('./middleware/erros');
 
 const app = express();
-
-app.use(helmet());
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  }),
-);
+app.use(cors());
 app.use(express.json());
 
-app.get("/", (request, response) => {
-  response.json({
-    message: "API do projeto base",
-  });
-});
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+app.use('/api', routes);
 
-app.use("/api/health", healthRoutes);
+// por último: rota inexistente e tratamento de erros
+app.use(naoEncontrada);
+app.use(tratarErros);
 
-app.use(errorHandler);
-
-export default app;
+module.exports = { app };
