@@ -23,7 +23,7 @@ function getPool() {
 
 // lê o schema.sql e devolve os comandos (sem CREATE DATABASE / USE: o nome do banco vem do .env)
 function comandosDoSchema() {
-  const sql = fs.readFileSync(path.join('..', 'database', 'init', '01-schema.sql'), 'utf8');
+  const sql = fs.readFileSync(path.join('../..', 'database', 'init', '01-schema.sql'), 'utf8');
   return sql
     .split('\n').filter((l) => !l.trim().startsWith('--')).join('\n')
     .split(';').map((s) => s.trim()).filter(Boolean)
