@@ -1,5 +1,6 @@
 const { app } = require('./app');
 const { initDb } = require('./db');
+const { iniciarMqtt } = require('./mqtt');
 const ia = require('./services/ia.service');
 
 const PORT = process.env.PORT || 8080;
@@ -10,6 +11,7 @@ initDb()
       console.log(`Greenly API rodando em http://localhost:${PORT}`);
       console.log('Admin:   admin@greenly.com / admin123');
       console.log('Usuário: isabelly@greenly.com / 123456');
+      iniciarMqtt(); // IoT: escuta os sensores da ESP32 via MQTT
       ia.iniciarMonitor(); // IA: aprende as estufas e confere os sensores a cada 1 minuto
     });
   })
