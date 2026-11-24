@@ -23,7 +23,7 @@ function getPool() {
 
 // lê o schema.sql e devolve os comandos (sem CREATE DATABASE / USE: o nome do banco vem do .env)
 function comandosDoSchema() {
-  const sql = fs.readFileSync(path.join('../..', 'database', 'init', '01-schema.sql'), 'utf8');
+  const sql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
   return sql
     .split('\n').filter((l) => !l.trim().startsWith('--')).join('\n')
     .split(';').map((s) => s.trim()).filter(Boolean)
@@ -35,10 +35,19 @@ const TABELAS = ['ia_perfis', 'notificacao_leitura', 'sessoes', 'usuario_estufa'
 
 async function initDb({ reset = false } = {}) {
   const c = config();
-  // 1) cria o banco se ainda não existir
-  const conexao = await mysql.createConnection({ host: c.host, port: c.port, user: c.user, password: c.password });
-  await conexao.query(`CREATE DATABASE IF NOT EXISTS \`${c.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
-  await conexao.end();
+  // 1) cria o banco se ainda não existir (ignora falta de permissão quando o banco já existe no servidor)
+  try {
+    const conexao = await mysql.createConnection({ host: c.host, port: c.port, user: c.user, password: c.password });
+    try {
+      await conexao.query(`CREATE DATABASE IF NOT EXISTS \`${c.database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+    } finally {
+      await conexao.end();
+    }
+  } catch (err) {
+    if (err.code !== 'ER_DBACCESS_DENIED_ERROR' && err.code !== 'ER_ACCESS_DENIED_ERROR') {
+      throw err;
+    }
+  }
 
   // 2) abre o pool de conexões
   if (pool) await pool.end();
