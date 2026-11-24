@@ -1,6 +1,7 @@
 // Cliente simples da API (fetch). A URL pode ser trocada em .env.local:
-// NEXT_PUBLIC_API_URL=http://localhost:8080
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+// NEXT_PUBLIC_API_URL=http://localhost:8080/api
+const RAW_API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api").replace(/\/+$/, "");
+export const API_URL = RAW_API_URL.endsWith("/api") ? RAW_API_URL : `${RAW_API_URL}/api`;
 
 export async function api(path, { method = "GET", body, token } = {}) {
   let res;
